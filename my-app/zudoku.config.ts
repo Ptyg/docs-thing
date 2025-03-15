@@ -9,7 +9,10 @@ const config: ZudokuConfig = {
     { id: "api", label: "API" },
   ],
   sidebar: {},
-  redirects: [{ from: "/", to: "/api/clients" }],
+  redirects: [
+    { from: "/docs-thing", to: "/docs-thing/api/clients" },
+    { from: "/", to: "/docs-thing/api/clients" },
+  ],
   apis: {
     type: "file",
     input: "./apis/openapi.yaml",
