@@ -1,6 +1,7 @@
 import type { ZudokuConfig } from "zudoku";
 
 const config: ZudokuConfig = {
+  basePath: "/docs-thing",
   topNavigation: [
     { id: "about", label: "About" },
     { id: "authorization", label: "Authorization" },
