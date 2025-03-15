@@ -1,0 +1,37 @@
+# Installation
+
+<Callout type="info">
+  Follow these steps to install and use the SDK in your project.
+</Callout>
+
+## Install the SDK
+
+To install the SDK, run the following command:
+
+```bash
+npm install @package/crm-sdk
+```
+
+## Usage Example
+
+Here’s how to use the SDK to interact with the API:
+
+```ts
+import { ClientsApi, InvoicesApi } from '@package/crm-sdk';
+
+// Initialize the Clients API
+const clientsApi = new ClientsApi();
+
+// Fetch all clients
+clientsApi.getClients()
+  .then((clients) => {
+    console.log('Clients:', clients);
+  })
+  .catch((error) => {
+    console.error('Error fetching clients:', error);
+  });
+```
+
+<Callout type="tip">
+  Make sure to replace `@your-org/crm-sdk` with the actual package name of your SDK.
+</Callout>
