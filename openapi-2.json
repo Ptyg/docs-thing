@@ -1,0 +1,430 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Sky Music Player API",
+    "description": "API for controlling the Sky Music Player application. This application simulates keyboard input corresponding to in-game musical notes for Sky: Children of the Light. It allows users to load and play pre-defined musical pieces.",
+    "version": "1.0.0",
+    "contact": {
+      "name": "Sky Player Dev Team (Example)",
+      "url": "http://example.com/contact",
+      "email": "dev@example.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8659",
+      "description": "Local development server"
+    }
+  ],
+  "tags": [
+    {
+      "name": "Playback",
+      "description": "Operations related to music playback control"
+    },
+    {
+      "name": "Songs",
+      "description": "Operations related to managing song files"
+    },
+    {
+      "name": "Status",
+      "description": "Operations related to getting player status"
+    }
+  ],
+  "paths": {
+    "/playback": {
+      "post": {
+        "tags": [
+          "Playback"
+        ],
+        "summary": "Start playback of a song",
+        "description": "Starts simulating keyboard inputs for the specified song ID. Assumes the song is already loaded. Requires Sky: Children of the Light window to be focused.",
+        "operationId": "startPlayback",
+        "requestBody": {
+          "description": "Specify the ID of the song to play.",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "songId": {
+                    "type": "string",
+                    "description": "The unique identifier of the song to play.",
+                    "example": "song_abc_123"
+                  }
+                },
+                "required": [
+                  "songId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Playback started successfully."
+          },
+          "400": {
+            "description": "Bad request - Invalid songId format or missing songId.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Song not found - The specified songId does not exist in the library.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - Playback is already in progress.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error - Failed to initiate key simulation.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Playback"
+        ],
+        "summary": "Stop playback",
+        "description": "Immediately stops any ongoing keyboard input simulation.",
+        "operationId": "stopPlayback",
+        "responses": {
+          "204": {
+            "description": "Playback stopped successfully."
+          },
+          "500": {
+             "description": "Internal server error - Failed to stop key simulation.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "tags": [
+          "Status"
+        ],
+        "summary": "Get player status",
+        "description": "Retrieves the current status of the music player (e.g., idle, playing, current song).",
+        "operationId": "getStatus",
+        "responses": {
+          "200": {
+            "description": "Current player status.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlayerStatus"
+                }
+              }
+            }
+          },
+          "500": {
+             "description": "Internal server error.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           }
+        }
+      }
+    },
+    "/songs": {
+      "get": {
+        "tags": [
+          "Songs"
+        ],
+        "summary": "List loaded songs",
+        "description": "Retrieves a list of songs currently loaded and available for playback.",
+        "operationId": "listSongs",
+        "responses": {
+          "200": {
+            "description": "A list of available songs.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SongInfo"
+                  }
+                }
+              }
+            }
+          },
+           "500": {
+             "description": "Internal server error.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           }
+        }
+      },
+      "post": {
+        "tags": [
+          "Songs"
+        ],
+        "summary": "Load a new song",
+        "description": "Loads a new song from provided data or a specified file path (Requires careful security considerations if using file paths directly via API). For this example, we assume song data is uploaded.",
+        "operationId": "loadSong",
+        "requestBody": {
+          "description": "Song data to load. The exact format depends on the chosen standard (e.g., custom JSON, ABC notation text).",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                 "$ref": "#/components/schemas/SongInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Song loaded successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SongInfo"
+                }
+              }
+            }
+          },
+          "400": {
+             "description": "Bad request - Invalid song data format.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           },
+           "500": {
+             "description": "Internal server error - Failed to parse or save the song.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           }
+        }
+      }
+    },
+    "/songs/{songId}": {
+       "delete": {
+         "tags": [
+           "Songs"
+         ],
+         "summary": "Delete a song",
+         "description": "Removes a song from the player's library.",
+         "operationId": "deleteSong",
+         "parameters": [
+           {
+             "name": "songId",
+             "in": "path",
+             "required": true,
+             "description": "ID of the song to delete.",
+             "schema": {
+               "type": "string"
+             }
+           }
+         ],
+         "responses": {
+           "204": {
+             "description": "Song deleted successfully."
+           },
+           "404": {
+             "description": "Song not found.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           },
+           "500": {
+             "description": "Internal server error.",
+             "content": {
+               "application/json": {
+                 "schema": {
+                   "$ref": "#/components/schemas/Error"
+                 }
+               }
+             }
+           }
+         }
+       }
+     }
+  },
+  "components": {
+    "schemas": {
+      "PlayerStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "idle",
+              "playing",
+              "stopped",
+              "error"
+            ],
+            "description": "The current state of the player."
+          },
+          "currentSongId": {
+            "type": "string",
+            "nullable": true,
+            "description": "The ID of the song currently playing or last played. Null if idle.",
+            "example": "song_abc_123"
+          },
+          "elapsedTimeSeconds": {
+             "type": "number",
+             "format": "float",
+             "nullable": true,
+             "description": "Elapsed time in seconds for the current song. Null if not playing."
+           },
+          "errorMessage": {
+            "type": "string",
+            "nullable": true,
+            "description": "Details if the status is 'error'."
+          }
+        },
+         "required": [
+           "status"
+         ]
+      },
+      "SongInfo": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the song.",
+            "example": "song_abc_123"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of the song.",
+            "example": "Main Theme"
+          },
+          "source": {
+             "type": "string",
+             "description": "Origin or artist of the song.",
+             "example": "Sky OST"
+           }
+        },
+         "required": [
+           "id",
+           "title"
+         ]
+      },
+       "SongInput": {
+         "type": "object",
+         "properties": {
+           "title": {
+             "type": "string",
+             "description": "Title for the new song.",
+             "example": "Custom Song"
+           },
+           "source": {
+              "type": "string",
+              "description": "Origin or artist of the song.",
+              "example": "User Transcription"
+            },
+            "format": {
+               "type": "string",
+               "enum": ["skyjson", "abc", "custom_text"],
+               "description": "The format of the provided song data.",
+               "example": "skyjson"
+            },
+           "data": {
+             "type": "object",
+             "description": "The actual song data. Structure depends on the 'format'. Could be a JSON object, a string for text formats, etc. Example here assumes a structured JSON.",
+             "properties": {
+                 "notes": {
+                     "type": "array",
+                     "items": {
+                         "type": "object",
+                         "properties": {
+                             "note": {"type": "string", "description": "e.g., C4, A#3 or specific Sky key like 'A1'"},
+                             "duration": {"type": "number", "format": "float", "description": "Duration in seconds"},
+                             "timeOffset": {"type": "number", "format": "float", "description": "Start time offset from beginning of song in seconds"}
+                         },
+                         "required": ["note", "duration", "timeOffset"]
+                     }
+                 },
+                 "tempo": {"type": "number", "description": "Optional tempo information (BPM)"}
+             },
+              "required": ["notes"]
+           }
+         },
+         "required": [
+           "title",
+           "format",
+           "data"
+         ]
+       },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "An application-specific error code.",
+            "example": "SONG_NOT_FOUND"
+          },
+          "message": {
+            "type": "string",
+            "description": "A human-readable explanation of the error.",
+            "example": "The specified song ID does not exist."
+          }
+        },
+        "required": [
+          "code",
+          "message"
+        ]
+      }
+    }
+  }
+}
